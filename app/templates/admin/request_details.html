@@ -1,0 +1,321 @@
+{% extends "base.html" %}
+{% block title %}Request Details | Admin{% endblock %}
+
+{% block content %}
+
+<!-- ===================================================== -->
+<!--  HEADER SECTION : Request Title + Emergency Badge    -->
+<!-- ===================================================== -->
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <div>
+    <h2 class="fw-bold">
+      Request #{{ request.request_id }}
+
+      <!-- Emergency indicator -->
+      {% if request.is_emergency %}
+        <span class="badge bg-danger ms-2">Emergency Case</span>
+      {% endif %}
+    </h2>
+
+    <!-- Basic patient information -->
+    <p class="text-muted mb-0">
+      Patient: {{ request.patient_name }} | Contact: {{ request.contact_number }}
+    </p>
+  </div>
+
+  <!-- Approve button (visible only if not approved yet) -->
+  <div>
+    {% if request.status != "Approved" %}
+      <a href="{{ url_for('admin.approve', request_id=request.request_id) }}"
+         class="btn btn-success">
+        Approve Request
+      </a>
+    {% else %}
+      <span class="badge bg-success p-2">Approved</span>
+    {% endif %}
+  </div>
+</div>
+
+<!-- Back navigation -->
+<div class="mb-3">
+  <a href="{{ url_for('admin.requests') }}"
+     class="btn btn-outline-secondary">
+    ← Back to Requests
+  </a>
+</div>
+
+
+<!-- ===================================================== -->
+<!--  MAIN CONTENT SECTION (Left + Right Layout)          -->
+<!-- ===================================================== -->
+<div class="row g-4 mb-4">
+
+  <!-- ================================================= -->
+  <!-- LEFT SIDE : REQUEST INFORMATION + PROGRESS FLOW  -->
+  <!-- ================================================= -->
+  <div class="col-md-4">
+    <div class="card shadow-sm border-0 rounded-4 h-100">
+      <div class="card-body">
+
+        <h5 class="fw-bold">Request Info</h5>
+
+        <!-- Blood group display -->
+        <p><b>Blood Group:</b>
+          <span class="badge bg-danger">
+            {{ request.blood_group_needed }}
+          </span>
+        </p>
+
+        <p><b>City:</b> {{ request.city }}</p>
+        <p><b>Pincode:</b> {{ request.pincode }}</p>
+
+        <!-- Current status -->
+        <p><b>Status:</b>
+          <span class="badge bg-dark">{{ request.status }}</span>
+        </p>
+
+        <hr>
+
+        <!-- ================================================= -->
+        <!-- Request Stage Flow Logic                          -->
+        <!-- ================================================= -->
+        <p class="small text-muted mb-1"><strong>Request Flow:</strong></p>
+
+        <ul class="small mb-0 list-unstyled">
+          <li class="{% if request.status == 'Pending' %}fw-bold text-primary{% endif %}">
+            • Pending
+          </li>
+
+          <li class="{% if request.status == 'Approved' %}fw-bold text-success{% endif %}">
+            • Approved
+          </li>
+
+          <li class="{% if request.status == 'Waiting' %}fw-bold text-warning{% endif %}">
+            • Volunteer Assigned
+          </li>
+
+          <li class="{% if request.status == 'Completed' %}fw-bold text-dark{% endif %}">
+            • Completed
+          </li>
+        </ul>
+
+        <hr>
+
+        <!-- ================================================= -->
+        <!-- Progress Bar Percentage Logic                    -->
+        <!-- ================================================= -->
+
+        {% set progress = 25 %}
+        {% if request.status == 'Approved' %}
+            {% set progress = 50 %}
+        {% elif request.status == 'Waiting' %}
+            {% set progress = 75 %}
+        {% elif request.status == 'Completed' %}
+            {% set progress = 100 %}
+        {% endif %}
+
+        <!-- Visual progress bar -->
+        <div class="progress mt-2" style="height: 6px; border-radius: 10px;">
+          <div 
+            class="progress-bar 
+              {% if request.status == 'Pending' %}bg-primary
+              {% elif request.status == 'Approved' %}bg-success
+              {% elif request.status == 'Waiting' %}bg-warning
+              {% elif request.status == 'Completed' %}bg-dark
+              {% endif %}"
+            role="progressbar"
+            style="width: {{ progress }}%; border-radius: 10px;">
+          </div>
+        </div>
+
+        <p class="small text-muted mt-2">
+          Progress: {{ progress }}% Completed
+        </p>
+
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ================================================= -->
+  <!-- RIGHT SIDE : MATCHED DONORS + VOLUNTEER ASSIGN   -->
+  <!-- ================================================= -->
+  <div class="col-md-8">
+
+    <!-- Emergency styling: red border -->
+    <div class="card shadow-sm rounded-4 h-100 
+      {% if request.is_emergency %}border border-danger border-3{% else %}border-0{% endif %}">
+      <div class="card-body">
+
+        <!-- Emergency highlight message -->
+        {% if request.is_emergency %}
+        <div class="text-danger fw-bold mb-2">
+          ⚠ Emergency Priority Case — Immediate Action Required
+        </div>
+        {% endif %}
+
+        <!-- Matching logic explanation (Academic section) -->
+        <div class="alert alert-light border small mb-3">
+          <strong>Donor Recommendation Logic:</strong>
+          <ul class="mb-0">
+            <li>Blood Compatibility Matching</li>
+            <li>Location Proximity (City & Pincode)</li>
+            <li>Availability Status</li>
+            <li>Emergency Priority Boost</li>
+          </ul>
+        </div>
+
+        <h5 class="fw-bold mb-3">
+          Recommended Donors (Priority Ranked)
+        </h5>
+
+        <p class="text-muted small">
+          Donors are ranked dynamically based on blood match,
+          same location priority, and availability.
+        </p>
+
+        <!-- ================================================= -->
+        <!-- STRICT MATCH DONORS TABLE                        -->
+        <!-- ================================================= -->
+
+        {% if matched_donors %}
+          <div class="table-responsive">
+            <table class="table table-striped align-middle">
+              <thead>
+                <tr>
+                  <th>Donor Name</th>
+                  <th>Blood Group</th>
+                  <th>Phone</th>
+                  <th>City</th>
+                  <th>Pincode</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+
+              <tbody>
+                {% for d in matched_donors %}
+                <tr>
+                  <td>
+                    {% if loop.index == 1 %}
+                      <span class="badge bg-success me-2">Top Match</span>
+                    {% else %}
+                      <span class="badge bg-secondary me-2">#{{ loop.index }}</span>
+                    {% endif %}
+                    {{ d.user.name }}
+                  </td>
+
+                  <td><span class="badge bg-danger">{{ d.blood_group }}</span></td>
+                  <td>{{ d.phone }}</td>
+                  <td>{{ d.city }}</td>
+                  <td>{{ d.pincode }}</td>
+
+                  <td>
+                    {% if d.availability %}
+                      <span class="badge bg-success">Active</span>
+                    {% else %}
+                      <span class="badge bg-secondary">Inactive</span>
+                    {% endif %}
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+
+        {% else %}
+          <div class="alert alert-warning">
+            No high-priority donors found in same location.
+          </div>
+        {% endif %}
+
+
+        <!-- ================================================= -->
+        <!-- VOLUNTEER ASSIGNMENT SECTION                     -->
+        <!-- ================================================= -->
+
+        <hr class="my-4">
+
+        <h5 class="fw-bold">Assign Volunteer</h5>
+
+        <p class="text-muted">
+          Active Volunteers Found: <b>{{ volunteers|length }}</b>
+        </p>
+
+        {% if volunteers %}
+          <form method="POST"
+                action="{{ url_for('admin.assign', request_id=request.request_id) }}">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+            <div class="row g-2">
+              <div class="col-md-8">
+                <select name="volunteer_id" class="form-select" required>
+                  <option value="">-- Select Active Volunteer --</option>
+
+                  {% for v in volunteers %}
+                    <option value="{{ v.volunteer_id }}">
+                      {{ v.user.name }} ({{ v.city }}) - {{ v.status }}
+                    </option>
+                  {% endfor %}
+                </select>
+              </div>
+
+              <div class="col-md-4">
+                <button class="btn btn-danger w-100">
+                  Assign
+                </button>
+              </div>
+            </div>
+          </form>
+
+        {% else %}
+          <div class="alert alert-danger mt-2">
+            No Active Volunteers Found.
+          </div>
+        {% endif %}
+
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ===================================================== -->
+<!-- COMPATIBLE DONORS (Fallback Matching)                -->
+<!-- ===================================================== -->
+
+<hr class="my-4">
+
+<h5 class="fw-bold">Compatible Donors</h5>
+
+{% if compatible_donors %}
+  <div class="table-responsive">
+    <table class="table table-bordered">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Blood Group</th>
+          <th>City</th>
+          <th>Contact</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        {% for donor in compatible_donors %}
+        <tr>
+          <td>{{ donor.user.name }}</td>
+          <td><span class="badge bg-danger">{{ donor.blood_group }}</span></td>
+          <td>{{ donor.city }}</td>
+          <td>{{ donor.phone }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+{% else %}
+  <div class="alert alert-warning">
+    No compatible donors available.
+  </div>
+{% endif %}
+
+{% endblock %}

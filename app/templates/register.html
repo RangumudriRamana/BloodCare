@@ -1,0 +1,145 @@
+{% extends "base.html" %}
+{% block title %}Register | BloodCare+{% endblock %}
+
+{% block content %}
+
+<!-- ===================================================== -->
+<!-- REGISTER PAGE                                        -->
+<!-- ===================================================== -->
+
+<div class="row justify-content-center">
+
+  <div class="col-md-6">
+
+    <div class="card shadow-lg border-0 rounded-4">
+
+      <div class="card-body p-4">
+
+        <!-- Heading -->
+        <h3 class="fw-bold text-center text-danger mb-3">
+          Create Your Account
+        </h3>
+
+        <p class="text-muted text-center mb-4">
+          Join BloodCare+ and become part of a life-saving community.
+        </p>
+
+        <!-- ================================================= -->
+<!-- REGISTER FORM                                     -->
+<!-- ================================================= -->
+
+<form method="POST">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+  <!-- Full Name -->
+  <div class="mb-3">
+    <label class="form-label">
+      Full Name <span class="text-danger">*</span>
+    </label>
+    <input type="text"
+           name="name"
+           class="form-control"
+           placeholder="Enter full name"
+           pattern="[A-Za-z\s]+"
+           title="Only alphabets and spaces allowed"
+           required>
+    <small class="text-muted">
+      Only letters allowed (e.g., Ramesh Kumar)
+    </small>
+  </div>
+
+  <!-- Email -->
+  <div class="mb-3">
+    <label class="form-label">
+      Email Address <span class="text-danger">*</span>
+    </label>
+    <input type="email"
+           name="email"
+           class="form-control"
+           placeholder="Enter email"
+           required>
+    <small class="text-muted">
+      Enter a valid email (e.g., example@gmail.com)
+    </small>
+  </div>
+
+  <!-- Password -->
+  <div class="mb-3">
+    <label class="form-label">
+      Password <span class="text-danger">*</span>
+    </label>
+    <input type="password"
+           name="password"
+           class="form-control"
+           placeholder="Create password"
+           minlength="6"
+           required>
+    <small class="text-muted">
+      Password must be at least 6 characters and include uppercase, lowercase, number, and special character.
+    </small>
+  </div>
+
+  <!-- Role Selection -->
+  <div class="mb-4">
+    <label class="form-label">
+      Register As <span class="text-danger">*</span>
+    </label>
+    <select name="role"
+            class="form-select"
+            required>
+      <option value="">-- Select Role --</option>
+      <option value="donor">Donor</option>
+      <option value="volunteer">Volunteer</option>
+      <option value="requester">Hospital / Patient</option>
+    </select>
+    <small class="text-muted">
+      Choose your role in the BloodCare system
+    </small>
+  </div>
+
+  <!-- Submit -->
+  <button type="submit"
+          class="btn btn-danger w-100 py-2 fw-semibold">
+    Register
+  </button>
+
+</form>
+        <!-- ================================================= -->
+        <!-- LOGIN LINKS (BLUEPRINT FIXED)                     -->
+        <!-- ================================================= -->
+
+        <div class="text-center mt-4">
+
+          <small class="text-muted">
+            Already registered?
+          </small>
+
+          <div class="mt-2">
+
+            <a href="{{ url_for('auth.donor_login') }}"
+               class="fw-semibold text-danger me-2">
+               Donor
+            </a>
+
+            <a href="{{ url_for('auth.requester_login') }}"
+               class="fw-semibold text-primary me-2">
+               Requester
+            </a>
+
+            <a href="{{ url_for('auth.volunteer_login') }}"
+               class="fw-semibold text-success me-2">
+               Volunteer
+            </a>
+
+          </div>
+
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+
+</div>
+
+{% endblock %}

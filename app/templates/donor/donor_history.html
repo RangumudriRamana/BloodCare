@@ -1,0 +1,119 @@
+{% extends "base.html" %}
+{% block title %}Donation History{% endblock %}
+
+{% block content %}
+
+<!-- ===================================================== -->
+<!-- PAGE HEADER                                          -->
+<!-- ===================================================== -->
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <div>
+    <h2 class="fw-bold">My Donation History</h2>
+    <p class="text-muted mb-0">
+      Track all your completed blood donations.
+    </p>
+  </div>
+
+  <!-- Back to Dashboard -->
+  <a href="{{ url_for('donor.dashboard') }}"
+     class="btn btn-outline-dark">
+    ← Back to Dashboard
+  </a>
+</div>
+
+
+<!-- ===================================================== -->
+<!-- SUMMARY STATISTICS CARD                              -->
+<!-- ===================================================== -->
+{% if donations %}
+<div class="card shadow-sm border-0 rounded-4 mb-4">
+  <div class="card-body text-center">
+
+    <h5 class="fw-bold mb-3">Donation Summary</h5>
+
+    <div class="row">
+      <div class="col-md-4">
+        <h3 class="fw-bold text-danger">{{ donations|length }}</h3>
+        <p class="text-muted">Total Donations</p>
+      </div>
+
+      <div class="col-md-4">
+        <h3 class="fw-bold text-success">
+          {{ donations[-1].donation_date.strftime("%d-%m-%Y") }}
+        </h3>
+        <p class="text-muted">Most Recent Donation</p>
+      </div>
+
+      <div class="col-md-4">
+        <h3 class="fw-bold text-primary">
+          {{ donations[0].donation_date.strftime("%d-%m-%Y") }}
+        </h3>
+        <p class="text-muted">First Donation</p>
+      </div>
+    </div>
+
+  </div>
+</div>
+{% endif %}
+
+
+<!-- ===================================================== -->
+<!-- DONATION HISTORY TABLE                               -->
+<!-- ===================================================== -->
+
+{% if donations %}
+  <div class="card shadow-sm border-0 rounded-4">
+    <div class="card-body">
+
+      <div class="table-responsive">
+        <table class="table table-striped align-middle">
+
+          <thead class="table-dark">
+            <tr>
+              <th>Request ID</th>
+              <th>Patient Name</th>
+              <th>Blood Group</th>
+              <th>City</th>
+              <th>Date of Donation</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            {% for d in donations %}
+            <tr>
+              <td>#{{ d.request.request_id }}</td>
+              <td>{{ d.request.patient_name }}</td>
+
+              <td>
+                <span class="badge bg-danger">
+                  {{ d.request.blood_group_needed }}
+                </span>
+              </td>
+
+              <td>{{ d.request.city }}</td>
+
+              <td>
+                {{ d.donation_date.strftime("%d-%m-%Y") }}
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+
+        </table>
+      </div>
+
+    </div>
+  </div>
+
+{% else %}
+  <!-- ===================================================== -->
+  <!-- NO HISTORY MESSAGE                                   -->
+  <!-- ===================================================== -->
+  <div class="alert alert-info shadow-sm">
+    <strong>No donation history yet.</strong><br>
+    Once you complete a donation through the system,
+    it will appear here.
+  </div>
+{% endif %}
+
+{% endblock %}

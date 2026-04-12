@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% block title %}Manage Donors | Admin{% endblock %}
+
+{% block content %}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h2 class="fw-bold mb-0">All Donors</h2>
+
+  <!-- ✅ Proper blueprint navigation -->
+  <a href="{{ url_for('admin.dashboard') }}" class="btn btn-outline-secondary">
+    ← Back to Dashboard
+  </a>
+</div>
+
+<div class="card shadow-sm border-0 rounded-4">
+  <div class="card-body">
+
+    {% if donors %}
+      <div class="table-responsive">
+        <table class="table table-striped align-middle">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Email</th>
+              <th>Blood Group</th>
+              <th>Phone</th>
+              <th>City</th>
+              <th>Pincode</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for d in donors %}
+            <tr>
+              <td>{{ d.user.name }}</td>
+              <td>{{ d.user.email }}</td>
+              <td>
+                <span class="badge bg-danger">
+                  {{ d.blood_group }}
+                </span>
+              </td>
+              <td>{{ d.phone }}</td>
+              <td>{{ d.city }}</td>
+              <td>{{ d.pincode }}</td>
+              <td>
+                {% if d.availability %}
+                  <span class="badge bg-success">Active</span>
+                {% else %}
+                  <span class="badge bg-secondary">Inactive</span>
+                {% endif %}
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <!-- ✅ Strict UX improvement -->
+      <div class="alert alert-info">
+        No donors registered yet.
+      </div>
+    {% endif %}
+
+  </div>
+</div>
+
+{% endblock %}

@@ -1,0 +1,126 @@
+{% extends "base.html" %}
+{% block title %}My Requests{% endblock %}
+
+{% block content %}
+
+<!-- ===================================================== -->
+<!-- PAGE HEADER                                          -->
+<!-- ===================================================== -->
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <div>
+    <h2 class="fw-bold">My Blood Requests</h2>
+    <p class="text-muted mb-0">
+      Track approval, volunteer assignment, and completion status.
+    </p>
+  </div>
+
+  <!-- Blueprint-safe new request route -->
+  <a href="{{ url_for('requester.new_request') }}"
+     class="btn btn-danger">
+    + New Request
+  </a>
+</div>
+
+<!-- Optional: Back to Dashboard -->
+<div class="mb-3">
+  <a href="{{ url_for('requester.dashboard') }}"
+     class="btn btn-outline-dark btn-sm">
+    ← Dashboard
+  </a>
+</div>
+
+
+<!-- ===================================================== -->
+<!-- REQUEST LIST TABLE                                   -->
+<!-- ===================================================== -->
+
+<div class="card shadow-sm border-0 rounded-4">
+  <div class="card-body">
+
+    {% if requests_list %}
+
+    <div class="table-responsive">
+      <table class="table table-striped align-middle">
+
+        <thead class="table-dark">
+          <tr>
+            <th>Request ID</th>
+            <th>Patient</th>
+            <th>Blood Group</th>
+            <th>City</th>
+            <th>Pincode</th>
+            <th>Status</th>
+            <th>Date</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          {% for r in requests_list %}
+          <tr>
+            <td>#{{ r.request_id }}</td>
+            <td>{{ r.patient_name }}</td>
+
+            <!-- Blood group badge -->
+            <td>
+              <span class="badge bg-danger">
+                {{ r.blood_group_needed }}
+              </span>
+            </td>
+
+            <td>{{ r.city }}</td>
+            <td>{{ r.pincode }}</td>
+
+            <!-- Dynamic Status Badge -->
+            <td>
+              {% if r.status == "Pending" %}
+                <span class="badge bg-warning text-dark">
+                  Pending
+                </span>
+
+              {% elif r.status == "Approved" %}
+                <span class="badge bg-success">
+                  Approved
+                </span>
+
+              {% elif r.status == "Waiting" %}
+                <span class="badge bg-primary">
+                  Volunteer Assigned
+                </span>
+
+              {% elif r.status == "Completed" %}
+                <span class="badge bg-dark">
+                  Completed
+                </span>
+
+              {% else %}
+                <span class="badge bg-secondary">
+                  {{ r.status }}
+                </span>
+              {% endif %}
+            </td>
+
+            <td>
+              {{ r.requested_at.strftime("%d-%m-%Y") }}
+            </td>
+
+          </tr>
+          {% endfor %}
+        </tbody>
+
+      </table>
+    </div>
+
+    {% else %}
+
+      <!-- No requests message -->
+      <div class="alert alert-info shadow-sm">
+        <strong>No requests submitted yet.</strong><br>
+        Click "New Request" to create a blood request.
+      </div>
+
+    {% endif %}
+
+  </div>
+</div>
+
+{% endblock %}

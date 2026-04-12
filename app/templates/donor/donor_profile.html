@@ -1,0 +1,122 @@
+{% extends "base.html" %}
+{% block title %}Donor Profile{% endblock %}
+
+{% block content %}
+
+<!-- ===================================================== -->
+<!-- DONOR PROFILE PAGE                                   -->
+<!-- ===================================================== -->
+
+<div class="row justify-content-center">
+  <div class="col-md-7">
+
+    <div class="card shadow-lg border-0 rounded-4">
+      <div class="card-body p-4">
+
+        <!-- Page Heading -->
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h3 class="fw-bold mb-0">Donor Profile</h3>
+
+          <!-- Back to Dashboard -->
+          <a href="{{ url_for('donor.dashboard') }}"
+             class="btn btn-outline-dark btn-sm">
+            ← Dashboard
+          </a>
+        </div>
+
+        <p class="text-muted small mb-4">
+          Update your blood group, contact details, and availability status.
+        </p>
+
+        <!-- ================================================= -->
+        <!-- PROFILE FORM                                     -->
+        <!-- ================================================= -->
+
+        <form method="POST">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+          <!-- Blood Group Selection -->
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Blood Group</label>
+            <select name="blood_group" class="form-select" required>
+              <option value="">-- Select Blood Group --</option>
+
+              {% for bg in ["A+","A-","B+","B-","AB+","AB-","O+","O-"] %}
+                <option value="{{ bg }}"
+                  {% if donor and donor.blood_group == bg %}selected{% endif %}>
+                  {{ bg }}
+                </option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <!-- Phone Number -->
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Phone Number</label>
+            <input type="text"
+                   name="phone"
+                   class="form-control"
+                   placeholder="Enter mobile number"
+                   value="{{ donor.phone if donor else '' }}"
+                   required>
+          </div>
+
+          <!-- Location Information -->
+          <div class="row">
+
+            <div class="col-md-6 mb-3">
+              <label class="form-label fw-semibold">City</label>
+              <input type="text"
+                     name="city"
+                     class="form-control"
+                     placeholder="Enter city"
+                     value="{{ donor.city if donor else '' }}"
+                     required>
+            </div>
+
+            <div class="col-md-6 mb-3">
+              <label class="form-label fw-semibold">Pincode</label>
+              <input type="text"
+                     name="pincode"
+                     class="form-control"
+                     placeholder="Enter pincode"
+                     value="{{ donor.pincode if donor else '' }}"
+                     required>
+            </div>
+
+          </div>
+
+          <!-- Availability Status -->
+          <div class="mb-4">
+            <label class="form-label fw-semibold">Availability Status</label>
+            <select name="availability" class="form-select" required>
+              <option value="Active"
+                {% if donor and donor.availability %}selected{% endif %}>
+                Active
+              </option>
+
+              <option value="Inactive"
+                {% if donor and not donor.availability %}selected{% endif %}>
+                Inactive
+              </option>
+            </select>
+
+            <small class="text-muted">
+              Only active donors will be considered for emergency matching.
+            </small>
+          </div>
+
+          <!-- Submit Button -->
+          <button class="btn btn-danger w-100 py-2 fw-semibold">
+            Save Profile
+          </button>
+
+        </form>
+
+      </div>
+    </div>
+
+  </div>
+</div>
+
+{% endblock %}

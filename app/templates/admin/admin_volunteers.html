@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% block title %}Manage Volunteers | Admin{% endblock %}
+
+{% block content %}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h2 class="fw-bold mb-0">All Volunteers</h2>
+
+  <!-- ✅ Blueprint-safe back link -->
+  <a href="{{ url_for('admin.dashboard') }}" class="btn btn-outline-secondary">
+    ← Back to Dashboard
+  </a>
+</div>
+
+<div class="card shadow-sm border-0 rounded-4">
+  <div class="card-body">
+
+    {% if volunteers %}
+      <div class="table-responsive">
+        <table class="table table-striped align-middle">
+          <thead class="table-dark">
+            <tr>
+              <th>Name</th>
+              <th>Email</th>
+              <th>Phone</th>
+              <th>City</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for v in volunteers %}
+            <tr>
+              <td>{{ v.user.name }}</td>
+              <td>{{ v.user.email }}</td>
+              <td>{{ v.phone }}</td>
+              <td>{{ v.city }}</td>
+              <td>
+                {% if v.status == "Active" %}
+                  <span class="badge bg-success">Active</span>
+                {% else %}
+                  <span class="badge bg-secondary">Inactive</span>
+                {% endif %}
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <!-- ✅ Strict UX improvement -->
+      <div class="alert alert-info">
+        No volunteers registered yet.
+      </div>
+    {% endif %}
+
+  </div>
+</div>
+
+{% endblock %}

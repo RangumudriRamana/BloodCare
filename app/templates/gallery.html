@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block title %}Gallery | BloodCare+{% endblock %}
+
+{% block content %}
+
+<section class="py-5 bg-dark text-white">
+  <div class="container">
+    <h2 class="text-center mb-5 fw-bold">Gallery</h2>
+
+    <div class="row g-4">
+
+      {% for image in images %}
+      <div class="col-md-3 col-sm-6">
+        <div class="gallery-item">
+          <img src="{{ url_for('static', filename='images/' + image) }}"
+               class="img-fluid rounded shadow gallery-img"
+               onclick="openModal(this.src)">
+        </div>
+      </div>
+      {% endfor %}
+
+    </div>
+  </div>
+</section>
+
+<!-- Lightbox Modal -->
+<div id="imageModal" class="custom-modal" onclick="closeModal()">
+  <img id="modalImage">
+</div>
+
+{% endblock %}

@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+{% block title %}Volunteer Profile{% endblock %}
+
+{% block content %}
+
+<!-- ===================================================== -->
+<!-- VOLUNTEER PROFILE PAGE                               -->
+<!-- ===================================================== -->
+
+<div class="row justify-content-center">
+
+  <div class="col-md-7">
+
+    <div class="card shadow-lg border-0 rounded-4">
+
+      <div class="card-body p-4">
+
+        <!-- Page Heading -->
+        <h3 class="fw-bold mb-2">
+          Volunteer Profile
+        </h3>
+
+        <p class="text-muted small mb-4">
+          Update your contact details and availability status.
+        </p>
+
+        <!-- ================================================= -->
+        <!-- PROFILE FORM                                      -->
+        <!-- ================================================= -->
+
+        <form method="POST">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+          <!-- Phone Field -->
+          <div class="mb-3">
+            <label class="form-label fw-semibold">
+              Phone Number
+            </label>
+
+            <input type="text"
+                   name="phone"
+                   class="form-control"
+                   placeholder="Enter your contact number"
+                   value="{{ volunteer.phone if volunteer else '' }}"
+                   required>
+          </div>
+
+          <!-- City Field -->
+          <div class="mb-3">
+            <label class="form-label fw-semibold">
+              City
+            </label>
+
+            <input type="text"
+                   name="city"
+                   class="form-control"
+                   placeholder="Enter your city"
+                   value="{{ volunteer.city if volunteer else '' }}"
+                   required>
+          </div>
+
+          <!-- Status Field -->
+          <div class="mb-4">
+            <label class="form-label fw-semibold">
+              Availability Status
+            </label>
+
+            <select name="status"
+                    class="form-select"
+                    required>
+
+              <option value="Active"
+                {% if volunteer and volunteer.status == "Active" %}
+                  selected
+                {% endif %}>
+                Active
+              </option>
+
+              <option value="Inactive"
+                {% if volunteer and volunteer.status == "Inactive" %}
+                  selected
+                {% endif %}>
+                Inactive
+              </option>
+
+            </select>
+
+            <small class="text-muted">
+              Only active volunteers can be assigned tasks.
+            </small>
+          </div>
+
+          <!-- Submit Button -->
+          <button class="btn btn-danger w-100 py-2 fw-semibold">
+            Save Profile
+          </button>
+
+        </form>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
+
+{% endblock %}

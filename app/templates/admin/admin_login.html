@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block title %}Admin Login | BloodCare+{% endblock %}
+
+{% block content %}
+<div class="container mt-5" style="max-width: 450px;">
+    <div class="card shadow p-4">
+        <h3 class="text-center text-dark mb-2">Admin Login</h3>
+        <p class="text-muted text-center small mb-4">
+            Secure access to administrator dashboard
+        </p>
+
+<form method="POST">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+    <!-- Email Field -->
+    <div class="mb-3">
+        <label class="form-label fw-semibold">Email</label>
+        <input type="email"
+               name="email"
+               class="form-control"
+               placeholder="Enter admin email"
+               required>
+    </div>
+
+    <!-- Password Field -->
+    <div class="mb-3">
+        <label class="form-label fw-semibold">Password</label>
+        <input type="password"
+               name="password"
+               class="form-control"
+               placeholder="Enter your password"
+               required>
+    </div>
+
+    <!-- Forgot Password Link -->
+    <div class="text-end mb-3">
+        <a href="{{ url_for('auth.forgot_password') }}"
+           class="text-decoration-none">
+            Forgot Password?
+        </a>
+    </div>
+
+    <!-- Submit Button -->
+    <button type="submit"
+            class="btn btn-dark w-100">
+        Login
+    </button>
+</form>
+    </div>
+</div>
+{% endblock %}
