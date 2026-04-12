@@ -14,10 +14,13 @@ from app.utils import create_admin
 # Create Flask app instance
 app = create_app()
 
-# Ensure default admin exists when application starts
-with app.app_context():
-    create_admin()
+# Ensure default admin exists safely (won’t crash app)
+try:
+    with app.app_context():
+        create_admin()
+except Exception as e:
+    print("Admin creation skipped:", e)
 
-# Run development server
+# Run development server (only for local)
 if __name__ == "__main__":
     app.run(debug=True)
