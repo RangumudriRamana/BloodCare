@@ -37,8 +37,8 @@ def create_admin():
     if not User.query.filter_by(email="admin@bloodcare.com").first():
         admin = User(
             name="Admin",
-            email="admin@bloodcare.com",
-            password_hash=generate_password_hash("Admin@123"),
+            email="bloodcareplus06@gmail.com",
+            password_hash=generate_password_hash("Bloodcareplus@2026"),
             role="admin"
         )
         db.session.add(admin)
