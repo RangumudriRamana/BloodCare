@@ -34,7 +34,7 @@ def create_admin():
     Create a default admin user if one  does not already exists.
     This runs during application startup.
     """
-    if not User.query.filter_by(email="admin@bloodcare.com").first():
+    if not User.query.filter_by(email="bloodcareplus06@gmail.com").first():
         admin = User(
             name="Admin",
             email="bloodcareplus06@gmail.com",
