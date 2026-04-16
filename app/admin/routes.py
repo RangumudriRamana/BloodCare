@@ -8,6 +8,7 @@ donor notification, and volunteer assignment.
 from flask import Blueprint, render_template, redirect, url_for, flash, request, current_app
 from flask_login import login_required
 from sqlalchemy.orm import joinedload
+import threading
 
 from ..models import BloodRequest, Donor, Volunteer, Assignment, User
 from ..extensions import db
@@ -15,6 +16,49 @@ from ..utils import get_compatible_blood_groups, role_required
 from ..email_utils import send_email, build_email_template
 
 admin_bp = Blueprint('admin', __name__, url_prefix='/admin')
+
+# Background Email Function
+def send_bulk_emails(app, donors, req):
+    """Send emails in background (no timeout)."""
+    with app.app_context():
+        for donor in donors:
+            # Send Donor Email
+            content = f"""
+            Hello {donor.user.name},
+
+            <p>An urgent blood requirement has been approved that matches your blood group.</p>
+
+            <table style="width:100%; border-collapse:collapse; margin-top:15px;">
+                <tr><td><strong>Patient Name:</strong></td><td>{req.patient_name}</td></tr>
+                <tr><td><strong>Blood Group Needed:</strong></td><td>{req.blood_group_needed}</td></tr>
+                <tr><td><strong>City:</strong></td><td>{req.city}</td></tr>
+                <tr><td><strong>Pincode:</strong></td><td>{req.pincode}</td></tr>
+                <tr><td><strong>Contact:</strong></td><td>{req.contact_number}</td></tr>
+            </table>
+
+            <p style="margin-top:15px;">
+            Your contribution can save a life. Please respond as soon as possible.
+            </p>
+            """
+
+            html_body = build_email_template(
+                title="Urgent Blood Match Found",
+                content=content,
+                button_text="Call Patient",
+                button_link=f"tel:{req.contact_number}",
+                is_emergency=req.is_emergency
+            )
+
+            try:
+                send_email(
+                    subject="BloodCare+ | Urgent Blood Match Found",
+                    recipients=[donor.user.email],
+                    html_body=html_body
+                )
+
+            except Exception as e:
+                current_app.logger.error(f"Email sending failed: {e}")
+
 
 
 # Admin Dashboard
@@ -143,6 +187,7 @@ def request_details(request_id):
 @admin_bp.route("/approve/<int:request_id>")
 @login_required
 @role_required("admin")
+
 def approve(request_id):
     """Approve a pending blood request and notify donors."""
 
@@ -159,7 +204,8 @@ def approve(request_id):
         db.session.rollback()
         flash("Something went wrong while approving request.", "danger")
         return redirect(url_for("admin.request_details", request_id=request_id))
-
+    
+    # Find Donors
     strict_donors = Donor.query.options(joinedload(Donor.user)).filter_by(
         blood_group=req.blood_group_needed,
         city=req.city,
@@ -175,44 +221,11 @@ def approve(request_id):
 
     final_donors = strict_donors if strict_donors else compatible_donors
 
-    for donor in final_donors:
-
-        # Send Donor email
-        content = f"""
-        <p>Hello <strong>{donor.user.name}</strong>,</p>
-
-        <p>An urgent blood requirement has been approved that matches your blood group.</p>
-
-        <table style="width:100%; border-collapse:collapse; margin-top:15px;">
-            <tr><td><strong>Patient Name:</strong></td><td>{req.patient_name}</td></tr>
-            <tr><td><strong>Blood Group Needed:</strong></td><td>{req.blood_group_needed}</td></tr>
-            <tr><td><strong>City:</strong></td><td>{req.city}</td></tr>
-            <tr><td><strong>Pincode:</strong></td><td>{req.pincode}</td></tr>
-            <tr><td><strong>Contact:</strong></td><td>{req.contact_number}</td></tr>
-        </table>
-
-        <p style="margin-top:15px;">
-        Your contribution can save a life. Please respond as soon as possible.
-        </p>
-        """
-
-        html_body = build_email_template(
-            title="Urgent Blood Match Found",
-            content=content,
-            button_text="Call Patient",
-            button_link=f"tel:{req.contact_number}",
-            is_emergency=req.is_emergency
-        )
-
-        try:
-            send_email(
-                subject="BloodCare+ | Urgent Blood Match Found",
-                recipients=[donor.user.email],
-                html_body=html_body
-            )
-        except Exception as e:
-            current_app.logger.error(f"Email sending failed: {e}")
-            flash("Request approved, but email notification failed.", "warning")
+    # Send emails in background
+    threading.Thread(
+        target=send_bulk_emails,
+        args=(current_app._get_current_object(), final_donors, req)
+    ).start()
 
     flash("Request approved and donors notified!", "success")
     return redirect(url_for("admin.request_details", request_id=request_id))

@@ -17,7 +17,7 @@ def send_email(subject, recipients, html_body):
         try:
             mail.send(msg)
         except Exception:
-            flash("Email could not be sent at this time.", "warning")
+            print("Email failed")
         return True
 
     except Exception as e:
